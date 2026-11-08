@@ -15,12 +15,17 @@ public class Main implements ApplicationListener {
 	private static final Color BG_COLOR = Color.valueOf("4C4C4C");
 	public static final int TILE_SIZE = 32;
 
-    private SpriteBatch spriteBatch;
+	Texture tile;
+	Texture pressedTile;
+
+	private SpriteBatch spriteBatch;
     private FitViewport viewport;
 
     private BitmapFont buttonFont;
     private GameButtonStyle buttonStyle;
     private GameButton btnBeginner, btnIntermediate, btnAdvanced;
+
+    Tile[][] minefield;
 
     @Override
     public void create() {
@@ -41,10 +46,18 @@ public class Main implements ApplicationListener {
 
     @Override
     public void render() {
+    	input();
+    	logic();
         draw();
     }
 
-    private void draw() {
+    private void input() {
+	}
+
+	private void logic() {
+	}
+
+	private void draw() {
 		ScreenUtils.clear( BG_COLOR );		
 		viewport.apply();
 		spriteBatch.setProjectionMatrix( viewport.getCamera().combined );
@@ -73,8 +86,12 @@ public class Main implements ApplicationListener {
     	spriteBatch.dispose();
     }
 
+    private void initBeginnerField() {
+    	minefield = new Tile[9][9];
+    }
+
 	private void initButtons() {
-		FreeTypeFontGenerator gen = new FreeTypeFontGenerator(Gdx.files.internal("Font.ttf"));
+		FreeTypeFontGenerator gen = new FreeTypeFontGenerator( Gdx.files.internal( "Font.ttf" ) );
         FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
         p.size = 32;
         p.minFilter = Texture.TextureFilter.Linear;
