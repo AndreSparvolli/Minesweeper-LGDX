@@ -21,8 +21,9 @@ import com.badlogic.gdx.utils.Disposable;
 public class GameButtonStyle extends TextButtonStyle implements Disposable {
 
 	// Cores de fundo e borda para cada estado (ajuste com o color picker se quiser mais fidelidade)
-	private static final Color UP_FILL     = Color.valueOf("3D3E4A");
-	private static final Color UP_BORDER   = Color.valueOf("555767");
+	// UP_FILL e UP_BORDER são visíveis no pacote porque o painel do campo (GameAssets) usa as mesmas cores
+	static final Color UP_FILL     = Color.valueOf("3D3E4A");
+	static final Color UP_BORDER   = Color.valueOf("555767");
 	private static final Color OVER_FILL   = Color.valueOf("4A4B59");
 	private static final Color OVER_BORDER = Color.valueOf("666879");
 	private static final Color DOWN_FILL   = Color.valueOf("2C2D36");
@@ -67,8 +68,8 @@ public class GameButtonStyle extends TextButtonStyle implements Disposable {
 	private static void drawPatch( Pixmap pixmap, int index, Color fill, Color border ) {
 		int x = index * PATCH_SIZE;
 		// Borda: retângulo arredondado completo; depois o preenchimento por cima, 1px para dentro
-		fillRoundedRect( pixmap, x, 0, PATCH_SIZE, PATCH_SIZE, CORNER_RADIUS, border );
-		fillRoundedRect( pixmap, x + 1, 1, PATCH_SIZE - 2, PATCH_SIZE - 2, CORNER_RADIUS - 1, fill );
+		PixmapUtils.fillRoundedRect( pixmap, x, 0, PATCH_SIZE, PATCH_SIZE, CORNER_RADIUS, border );
+		PixmapUtils.fillRoundedRect( pixmap, x + 1, 1, PATCH_SIZE - 2, PATCH_SIZE - 2, CORNER_RADIUS - 1, fill );
 	}
 
 	// Cria o NinePatch de um estado a partir da sua região na textura
@@ -77,29 +78,6 @@ public class GameButtonStyle extends TextButtonStyle implements Disposable {
 		// Os cantos (CORNER_RADIUS + 1 px) ficam fixos e apenas o miolo é esticado
 		int margin = CORNER_RADIUS + 1;
 		return new NinePatchDrawable( new NinePatch( region, margin, margin, margin, margin ) );
-	}
-
-	private static void fillRoundedRect( Pixmap pixmap, int x, int y, int width, int height, int radius, Color color ) {
-		pixmap.setColor( color );
-
-		if ( radius <= 0 ) {
-			pixmap.fillRectangle( x, y, width, height );
-			return;
-		}
-
-		// Faixas horizontal e vertical em cruz
-		pixmap.fillRectangle( x + radius, y, width - radius * 2, height );
-		pixmap.fillRectangle( x, y + radius, width, height - radius * 2 );
-
-		// Um círculo em cada canto
-		int left = x + radius;
-		int right = x + width - 1 - radius;
-		int top = y + radius;
-		int bottom = y + height - 1 - radius;
-		pixmap.fillCircle( left, top, radius );
-		pixmap.fillCircle( right, top, radius );
-		pixmap.fillCircle( left, bottom, radius );
-		pixmap.fillCircle( right, bottom, radius );
 	}
 
 	@Override

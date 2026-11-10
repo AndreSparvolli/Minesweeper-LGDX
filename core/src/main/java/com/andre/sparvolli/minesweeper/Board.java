@@ -106,6 +106,10 @@ public class Board {
 		return this.status;
 	}
 
+	public int getMineCount() {
+		return this.mineCount;
+	}
+
 	public int getRemainingMines() {
 		return this.mineCount - this.flagsPlaced;
 	}
@@ -209,6 +213,22 @@ public class Board {
 	private void winCheck() {
 		if ( this.revealedSafe == this.rows * this.cols - this.mineCount ) {
 			this.status = Status.WON;
+			flagAllMines();
 		}
+	}
+
+	// Comportamento clássico ao vencer: todas as minas recebem flag e o contador zera
+	private void flagAllMines() {
+		for ( int r = 0; r < this.rows; r++ ) {
+			for ( int c = 0; c < this.cols; c++ ) {
+				Tile tile = this.grid[r][c];
+
+				if ( tile.isMine() ) {
+					tile.flag();
+				}
+			}
+		}
+
+		this.flagsPlaced = this.mineCount;
 	}
 }

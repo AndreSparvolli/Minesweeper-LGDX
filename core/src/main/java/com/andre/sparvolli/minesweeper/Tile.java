@@ -32,6 +32,13 @@ public class Tile {
         }
     }
 
+    /** Marca com flag diretamente (usado ao vencer); tiles revelados não mudam. */
+    public void flag() {
+        if (state != State.REVEALED) {
+            state = State.FLAGGED;
+        }
+    }
+
     public int getRow() {
 		return row;
 	}

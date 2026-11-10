@@ -15,8 +15,13 @@ public class BoardRenderer {
 		Color.MAROON, Color.TEAL, Color.BLACK, Color.GRAY
 	};
 
+	// Margem do painel em volta do campo; no 30x16 o campo tem 960 px de largura em 1000, então no máximo 20
+	private static final float PANEL_PADDING = 5f;
+
 	private final GameAssets assets;
 	private final BitmapFont font;
+	private final float areaX;
+	private final float areaY;
 	private final float areaWidth;
 	private final float areaHeight;
 	private final GlyphLayout[] numberLayouts = new GlyphLayout[9];
@@ -24,10 +29,20 @@ public class BoardRenderer {
 	private Board board;
 	private float originX;
 	private float originY;
+	private float boardWidth;
+	private float boardHeight;
 
-	public BoardRenderer( GameAssets assets, BitmapFont numberFont, float areaWidth, float areaHeight ) {
+	/**
+	 * @param areaX      canto inferior esquerdo da área onde o campo é centralizado
+	 * @param areaY      canto inferior esquerdo da área onde o campo é centralizado
+	 * @param areaWidth  largura da área
+	 * @param areaHeight altura da área
+	 */
+	public BoardRenderer( GameAssets assets, BitmapFont numberFont, float areaX, float areaY, float areaWidth, float areaHeight ) {
 		this.assets = assets;
 		this.font = numberFont;
+		this.areaX = areaX;
+		this.areaY = areaY;
 		this.areaWidth = areaWidth;
 		this.areaHeight = areaHeight;
 
@@ -45,6 +60,11 @@ public class BoardRenderer {
 		if ( this.board == null ) {
 			return;
 		}
+
+		// Painel primeiro: os tiles são desenhados por cima
+		this.assets.panel.draw( batch,
+			this.originX - PANEL_PADDING, this.originY - PANEL_PADDING,
+			this.boardWidth + PANEL_PADDING * 2, this.boardHeight + PANEL_PADDING * 2 );
 
 		boolean lost = this.board.getStatus() == Board.Status.LOST;
 		int rows = this.board.getRows();
@@ -128,9 +148,9 @@ public class BoardRenderer {
 	}
 
 	private void layout() {
-		float boardW = this.board.getCols() * Main.TILE_SIZE;
-		float boardH = this.board.getRows() * Main.TILE_SIZE;
-		this.originX = ( this.areaWidth - boardW ) / 2f;
-		this.originY = ( this.areaHeight - boardH ) / 2f;
+		this.boardWidth = this.board.getCols() * Main.TILE_SIZE;
+		this.boardHeight = this.board.getRows() * Main.TILE_SIZE;
+		this.originX = this.areaX + ( this.areaWidth - this.boardWidth ) / 2f;
+		this.originY = this.areaY + ( this.areaHeight - this.boardHeight ) / 2f;
 	}
 }

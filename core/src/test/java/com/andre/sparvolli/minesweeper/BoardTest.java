@@ -161,6 +161,27 @@ class BoardTest {
 	}
 
 	@Test
+	void winningFlagsAllMinesAndZeroesCounter() {
+		this.board.reveal( 0, 0 );
+		Tile mine = findMine( this.board );
+		this.board.cycleMark( mine.getRow(), mine.getCol() ); // FLAGGED
+		this.board.cycleMark( mine.getRow(), mine.getCol() ); // QUESTION: também deve virar flag
+
+		revealAllSafe( this.board );
+
+		assertEquals( 0, this.board.getRemainingMines() );
+
+		for ( int r = 0; r < ROWS; r++ ) {
+			for ( int c = 0; c < COLS; c++ ) {
+				Tile tile = this.board.getTile( r, c );
+				if ( tile.isMine() ) {
+					assertEquals( Tile.State.FLAGGED, tile.getState() );
+				}
+			}
+		}
+	}
+
+	@Test
 	void revealingSameTileTwiceDoesNotCountTwice() {
 		this.board.reveal( 0, 0 );
 
