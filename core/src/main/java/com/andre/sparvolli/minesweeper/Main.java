@@ -2,106 +2,124 @@ package com.andre.sparvolli.minesweeper;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main implements ApplicationListener {
-	private static final Color BG_COLOR = Color.valueOf("4C4C4C");
+	private static final Color BG_COLOR = Color.valueOf( "4C4C4C" );
 	public static final int TILE_SIZE = 32;
 
-	Texture tile;
-	Texture pressedTile;
-
+	private FitViewport viewport;
 	private SpriteBatch spriteBatch;
-    private FitViewport viewport;
+	private Stage stage;
 
-    private BitmapFont buttonFont;
-    private GameButtonStyle buttonStyle;
-    private GameButton btnBeginner, btnIntermediate, btnAdvanced;
+	private BitmapFont buttonFont;
+	private BitmapFont numberFont;
+	private GameButtonStyle buttonStyle;
+	private GameButton btnBeginner, btnIntermediate, btnAdvanced;
 
-    Tile[][] minefield;
+	private GameAssets gameAssets;
+	private Board board;
+	private BoardRenderer boardRenderer;
+	private BoardInput boardInput;
 
-    @Override
-    public void create() {
-        spriteBatch = new SpriteBatch();
-        viewport = new FitViewport(1000, 800);
+	@Override
+	public void create() {
+		this.spriteBatch = new SpriteBatch();
+		this.viewport = new FitViewport( 1000, 800 );
 
-        initButtons();
-    }
+		this.gameAssets = new GameAssets();
 
-    @Override
-    public void resize(int width, int height) {
-        if ( width <= 0 || height <= 0 ) {
-        	return;
-        }
+		initFonts();
+		initButtons();
 
-        viewport.update( width, height, true );
-    }
+		this.boardRenderer = new BoardRenderer( this.gameAssets, this.numberFont, 1000, 700 );
+		this.boardInput = new BoardInput( this.viewport, this.boardRenderer );
 
-    @Override
-    public void render() {
-    	input();
-    	logic();
-        draw();
-    }
+		this.stage = new Stage( this.viewport, this.spriteBatch );
+		this.stage.addActor( this.btnBeginner );
+		this.stage.addActor( this.btnIntermediate );
+		this.stage.addActor( this.btnAdvanced );
 
-    private void input() {
-	}
+		Gdx.input.setInputProcessor( new InputMultiplexer( this.stage, this.boardInput ) );
 
-	private void logic() {
-	}
-
-	private void draw() {
-		ScreenUtils.clear( BG_COLOR );		
-		viewport.apply();
-		spriteBatch.setProjectionMatrix( viewport.getCamera().combined );
-
-		spriteBatch.begin();
-
-		btnBeginner.draw( spriteBatch, 1f );
-		btnIntermediate.draw( spriteBatch, 1f );
-		btnAdvanced.draw( spriteBatch, 1f );
-
-		spriteBatch.end();
+		startGame( 9, 9, 10 );
 	}
 
 	@Override
-    public void pause() {
-    }
+	public void resize( int width, int height ) {
+		if ( width <= 0 || height <= 0 ) {
+			return;
+		}
 
-    @Override
-    public void resume() {
-    }
+		this.viewport.update( width, height, true );
+	}
 
-    @Override
-    public void dispose() {
-    	buttonStyle.dispose();
-    	buttonFont.dispose();
-    	spriteBatch.dispose();
-    }
+	@Override
+	public void render() {
+		ScreenUtils.clear( BG_COLOR );
+		this.viewport.apply();
+		this.spriteBatch.setProjectionMatrix( this.viewport.getCamera().combined );
+		this.stage.act( Gdx.graphics.getDeltaTime() );
 
-    private void initBeginnerField() {
-    	minefield = new Tile[9][9];
-    }
+		this.spriteBatch.begin();
+		this.boardRenderer.draw( this.spriteBatch );
+		this.spriteBatch.end();
+
+		this.stage.draw();
+	}
+
+	@Override
+	public void pause() {
+	}
+
+	@Override
+	public void resume() {
+	}
+
+	@Override
+	public void dispose() {
+		this.stage.dispose();
+		this.buttonStyle.dispose();
+		this.buttonFont.dispose();
+		this.numberFont.dispose();
+		this.gameAssets.dispose();
+		this.spriteBatch.dispose();
+	}
 
 	private void initButtons() {
-		FreeTypeFontGenerator gen = new FreeTypeFontGenerator( Gdx.files.internal( "Font.ttf" ) );
-        FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        p.size = 32;
-        p.minFilter = Texture.TextureFilter.Linear;
-        p.magFilter = Texture.TextureFilter.Linear;
-        buttonFont = gen.generateFont(p);
-        gen.dispose();
+		this.buttonStyle = new GameButtonStyle( this.buttonFont );
+		this.btnBeginner = new GameButton( "9 X 9", this.buttonStyle, 137, 716, 150, 66, () -> startGame( 9, 9, 10 ) );
+		this.btnIntermediate = new GameButton( "16 X 16", this.buttonStyle, 423, 716, 150, 66, () -> startGame( 16, 16, 40 ) );
+		this.btnAdvanced = new GameButton( "30 X 16", this.buttonStyle, 709, 716, 150, 66, () -> startGame( 16, 30, 99 ) );
+	}
 
-        buttonStyle = new GameButtonStyle( buttonFont );
-        btnBeginner = new GameButton( "9 X 9", buttonStyle, 137, 716, 150, 66, () -> { /* iniciar 9x9 */ } );
-        btnIntermediate = new GameButton( "16 X 16", buttonStyle, 423, 716, 150, 66, () -> { /* iniciar 16x16 */ } );
-        btnAdvanced = new GameButton( "30 X 16", buttonStyle, 709, 716, 150, 66, () -> { /* iniciar 30x16 */ } );
+	private void initFonts() {
+		FreeTypeFontGenerator gen = new FreeTypeFontGenerator( Gdx.files.internal( "Font.ttf" ) );
+		FreeTypeFontGenerator.FreeTypeFontParameter p = new FreeTypeFontGenerator.FreeTypeFontParameter();
+
+		p.size = 32;
+		p.minFilter = Texture.TextureFilter.Linear;
+		p.magFilter = Texture.TextureFilter.Linear;
+		this.buttonFont = gen.generateFont( p );
+
+		p.size = 22;
+		this.numberFont = gen.generateFont( p );
+
+		gen.dispose();
+	}
+
+	private void startGame( int rows, int cols, int mines ) {
+		this.board = new Board( rows, cols, mines );
+		this.boardRenderer.setBoard( this.board );
+		this.boardInput.setBoard( this.board );
 	}
 }
